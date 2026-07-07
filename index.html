@@ -311,6 +311,50 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
   }
 }
 
+
+/* Ajuste assinatura editável */
+.sign input{
+  display:block;
+  width:80%;
+  margin-left:auto;
+  margin-right:auto;
+  cursor:text;
+}
+@media print{
+  .sign input{
+    border:0 !important;
+    border-bottom:1px solid #082b5f !important;
+    background:transparent !important;
+    text-align:center !important;
+    font-weight:900 !important;
+    color:#082b5f !important;
+  }
+}
+
+
+/* Ajuste listas assinatura e quantidades */
+.sign select{
+  display:block;
+  width:80%;
+  margin-left:auto;
+  margin-right:auto;
+  cursor:pointer;
+  border:0;
+  border-bottom:1px solid #082b5f;
+  border-radius:0;
+  background:#fff;
+}
+@media print{
+  .sign select{
+    border:0 !important;
+    border-bottom:1px solid #082b5f !important;
+    background:transparent !important;
+    text-align:center !important;
+    font-weight:900 !important;
+    color:#082b5f !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -349,12 +393,20 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
 
   <div class="info">
     <div class="field"><label>DATA</label><input data-save type="date" id="data"></div>
-    <div class="field"><label>CONTRATO / PROJETO</label><input data-save id="contrato" placeholder=""></div>
-    <div class="field"><label>CLIENTE</label><input data-save id="cliente" placeholder="Ex: PALMONT"></div>
-    <div class="field"><label>PRESTADORA DE SERVIÇO</label><input data-save id="prestadora"></div>
-    <div class="field"><label>RESPONSÁVEL</label><input data-save id="responsavel"></div>
-    <div class="field"><label>LOCAL DA OBRA</label><input data-save id="local"></div>
-    <div class="field"><label>CONDIÇÕES CLIMÁTICAS</label><select data-save id="clima"><option></option><option>Ensolarado</option><option>Nublado</option><option>Chuvoso</option><option>Outros</option></select></div>
+    <div class="field"><label>CONTRATO / PROJETO</label><select data-save id="contrato" placeholder="" value="GASA"><option selected>GASA</option></select></div>
+    <div class="field"><label>CLIENTE</label><select data-save id="cliente" value="PALMONT" value="PALMONT"><option selected>PALMONT</option></select></div>
+    <div class="field"><label>PRESTADORA DE SERVIÇO</label><select data-save id="prestadora" value="SHALOM / CISENG"><option selected>SHALOM</option><option>CISENG</option></select></div>
+    <div class="field"><label>RESPONSÁVEL</label><select data-save id="responsavel">
+      <option selected>RAFAEL COSTA</option>
+      <option>CASSIO</option>
+    </select></div>
+    <div class="field"><label>LOCAL FABRICAÇÃO</label><select data-save id="local"><option selected>JAMBEIRO</option></select></div>
+    <div class="field"><label>CONDIÇÕES CLIMÁTICAS</label><select data-save id="clima">
+      <option selected>ENSOLARADO</option>
+      <option>NUBLADO</option>
+      <option>CHUVOSO</option>
+      <option>OUTROS</option>
+    </select></div>
     <div class="field"><label>INÍCIO</label><input data-save type="time" id="inicio"></div>
     <div class="field"><label>TÉRMINO</label><input data-save type="time" id="termino"></div>
   </div>
@@ -380,19 +432,19 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
   <div class="grid2">
     <div class="section"><h2>4. EFETIVO</h2><div class="content">
       <table><tr><th>FUNÇÃO</th><th>QUANTIDADE</th></tr>
-      <tr><td>Soldadores</td><td><input data-save id="ef_soldadores"></td></tr>
-      <tr><td>Encanadores</td><td><input data-save id="ef_encanadores"></td></tr>
-      <tr><td>Inspetor CQ</td><td><input data-save id="ef_cq"></td></tr>
-      <tr><td>Supervisor</td><td><input data-save id="ef_supervisor"></td></tr>
-      <tr><th>TOTAL</th><th><input data-save id="ef_total"></th></tr></table>
+      <tr><td>Soldadores</td><td><select data-save id="ef_soldadores"><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>N/A</option></select></td></tr>
+      <tr><td>Encanadores</td><td><select data-save id="ef_encanadores"><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>N/A</option></select></td></tr>
+      <tr><td>Inspetor CQ</td><td><select data-save id="ef_cq"><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>N/A</option></select></td></tr>
+      <tr><td>Supervisor</td><td><select data-save id="ef_supervisor"><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>N/A</option></select></td></tr>
+      <tr><th>TOTAL</th><th><select data-save id="ef_total"><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>N/A</option></select></th></tr></table>
     </div></div>
     <div class="section"><h2>5. EQUIPAMENTOS UTILIZADOS</h2><div class="content">
       <table><tr><th>EQUIPAMENTO</th><th>QUANTIDADE</th></tr>
-      <tr><td>Máquina de Solda (TIG/MIG)</td><td><input data-save id="eq_solda"></td></tr>
-      <tr><td>Esmerilhadeira</td><td><input data-save id="eq_esmerilhadeira"></td></tr>
-      <tr><td>Talha</td><td><input data-save id="eq_talha"></td></tr>
-      <tr><td>Empilhadeira</td><td><input data-save id="eq_empilhadeira"></td></tr>
-      <tr><td>Ponte Rolante</td><td><input data-save id="eq_ponte"></td></tr></table>
+      <tr><td>Máquina de Solda (TIG/MIG)</td><td><select data-save id="eq_solda"><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>N/A</option></select></td></tr>
+      <tr><td>Esmerilhadeira</td><td><select data-save id="eq_esmerilhadeira"><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>N/A</option></select></td></tr>
+      <tr><td>Talha</td><td><select data-save id="eq_talha"><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>N/A</option></select></td></tr>
+      <tr><td>Empilhadeira</td><td><select data-save id="eq_empilhadeira"><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>N/A</option></select></td></tr>
+      <tr><td>Ponte Rolante</td><td><select data-save id="eq_ponte"><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option><option>N/A</option></select></td></tr></table>
     </div></div>
   </div>
 
@@ -433,10 +485,20 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
   </div>
 
   <div class="footer-sign">
-    <div class="sign">RESPONSÁVEL (PRESTADORA)<br><br>______________________________</div>
-    <div class="sign">FISCAL (CLIENTE)<br><br>______________________________</div>
-  </div>
-</div>
+    <div class="sign">
+      <div>RESPONSÁVEL (PRESTADORA)</div>
+      <select data-save id="assin_prestadora" style="margin-top:14px;text-align:center;font-weight:900;color:#082b5f;">
+        <option selected>RAFAEL COSTA</option>
+        <option>CASSIO</option>
+      </select>
+    </div>
+    <div class="sign">
+      <div>FISCAL (CLIENTE)</div>
+      <select data-save id="fiscal_cliente" style="margin-top:14px;text-align:center;font-weight:900;color:#082b5f;">
+        <option selected>ROBSON CALIXTO</option>
+      </select>
+    </div>
+  </div></div>
 </div>
 
 <script>
