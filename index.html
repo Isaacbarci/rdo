@@ -321,13 +321,24 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
   cursor:text;
 }
 @media print{
+  .sign{
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:flex-end !important;
+  }
   .sign input{
+    display:block !important;
+    width:90% !important;
+    margin:8px auto 0 auto !important;
+    padding:0 !important;
     border:0 !important;
     border-bottom:1px solid #082b5f !important;
     background:transparent !important;
     text-align:center !important;
     font-weight:900 !important;
     color:#082b5f !important;
+    line-height:1.2 !important;
   }
 }
 
@@ -346,12 +357,18 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
 }
 @media print{
   .sign select{
+    display:block !important;
+    width:90% !important;
+    margin:8px auto 0 auto !important;
+    padding:0 !important;
     border:0 !important;
     border-bottom:1px solid #082b5f !important;
     background:transparent !important;
     text-align:center !important;
+    text-align-last:center !important;
     font-weight:900 !important;
     color:#082b5f !important;
+    line-height:1.2 !important;
   }
 }
 
