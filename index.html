@@ -30,9 +30,9 @@ button{border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:point
 .header{display:grid;grid-template-columns:280px 1fr 170px;background:var(--azul);color:#fff}
 .brand{background:#fff;padding:8px 14px;display:flex;align-items:center;justify-content:center}
 .brand img{max-width:100%;max-height:86px;object-fit:contain}
-.title{display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;text-align:center}
+.title{display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;text-align:left}
 .rdo-num{border-left:1px solid #ffffff55;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900}
-.rdo-num input{width:100px;text-align:center;font-size:30px;font-weight:900;color:#fff;background:transparent;border:0;border-bottom:2px solid #fff}
+.rdo-num input{width:100px;text-align:left;font-size:30px;font-weight:900;color:#fff;background:transparent;border:0;border-bottom:2px solid #fff}
 .info{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--borda)}
 .field{padding:10px;border-right:1px solid var(--borda);border-top:1px solid var(--borda)}
 .field label{display:block;font-size:12px;font-weight:900;color:var(--azul);margin-bottom:6px}
@@ -47,7 +47,7 @@ textarea{resize:vertical;min-height:70px}
 .card label{font-size:12px;font-weight:900;color:var(--azul)}
 .kpi{display:flex;gap:10px;align-items:center}
 .kpi span{font-size:30px}
-.kpi input{font-size:24px;font-weight:900;text-align:center}
+.kpi input{font-size:24px;font-weight:900;text-align:left}
 table{width:100%;border-collapse:collapse}
 th,td{border:1px solid var(--borda);padding:7px;font-size:14px}
 th{background:#f0f3f7;color:var(--azul);font-weight:900}
@@ -56,11 +56,11 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
 .seguranca h2{background:var(--verde)}
 .pendencias h2{background:var(--laranja)}
 .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.photo{border:2px dashed #aab3bd;border-radius:10px;min-height:120px;display:flex;align-items:center;justify-content:center;text-align:center;color:#888;position:relative;overflow:hidden;background:#fafafa}
+.photo{border:2px dashed #aab3bd;border-radius:10px;min-height:120px;display:flex;align-items:center;justify-content:center;text-align:left;color:#888;position:relative;overflow:hidden;background:#fafafa}
 .photo img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
 .photo input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .footer-sign{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px}
-.sign{border:1px solid var(--borda);border-radius:8px;padding:20px;text-align:center;font-weight:900;color:var(--azul)}
+.sign{border:1px solid var(--borda);border-radius:8px;padding:20px;text-align:left;font-weight:900;color:var(--azul)}
 
 .modal{display:none;position:fixed;inset:0;background:#0008;z-index:999;align-items:center;justify-content:center;padding:16px}
 .modal-box{background:#fff;width:min(1000px,96vw);max-height:88vh;overflow:auto;border-radius:14px;padding:16px;box-shadow:0 8px 30px #0006}
@@ -75,7 +75,7 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
 
 @media(max-width:800px){
   .header{grid-template-columns:1fr}
-  .brand,.title,.rdo-num{justify-content:center;text-align:center}
+  .brand,.title,.rdo-num{justify-content:center;text-align:left}
   .info,.grid2,.grid3,.photo-grid{grid-template-columns:1fr}
 }
 
@@ -143,7 +143,7 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
     border:0 !important;
     border-bottom:2px solid #fff !important;
     background:transparent !important;
-    text-align:center !important;
+    text-align:left !important;
   }
 
   .info{
@@ -268,7 +268,7 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
   .kpi input{
     font-size:18px !important;
     font-weight:900 !important;
-    text-align:center !important;
+    text-align:left !important;
   }
 
   table{
@@ -335,7 +335,7 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
     border:0 !important;
     border-bottom:1px solid #082b5f !important;
     background:transparent !important;
-    text-align:center !important;
+    text-align:left !important;
     font-weight:900 !important;
     color:#082b5f !important;
     line-height:1.2 !important;
@@ -364,11 +364,39 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
     border:0 !important;
     border-bottom:1px solid #082b5f !important;
     background:transparent !important;
-    text-align:center !important;
+    text-align:left !important;
     text-align-last:center !important;
     font-weight:900 !important;
     color:#082b5f !important;
     line-height:1.2 !important;
+  }
+}
+
+
+th.quantidade-left, th.total-left { text-align:left !important; padding-left:8px; }
+
+
+
+/* Quantidades alinhadas como os demais campos */
+td select,
+td input[type="number"],
+td input[readonly]{
+    text-align:left !important;
+    text-align-last:left !important;
+    padding-left:2px !important;
+}
+
+
+/* PDF: alinhar quantidades igual aos demais campos */
+@media print{
+  td select,
+  td input[type="number"],
+  td input[readonly]{
+    text-align:left !important;
+    text-align-last:left !important;
+    padding-left:2px !important;
+    margin-left:0 !important;
+    font-size:10px !important;
   }
 }
 
@@ -448,15 +476,15 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
 
   <div class="grid2">
     <div class="section"><h2>4. EFETIVO</h2><div class="content">
-      <table><tr><th>FUNÇÃO</th><th>QUANTIDADE</th></tr>
+      <table><tr><th>FUNÇÃO</th><th class="quantidade-left">Quantidade</th></tr>
       <tr><td>Soldadores</td><td><select  data-save id="ef_soldadores"><option>N/A</option><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option></select></td></tr>
       <tr><td>Encanadores</td><td><select  data-save id="ef_encanadores"><option>N/A</option><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option></select></td></tr>
       <tr><td>Inspetor CQ</td><td><select  data-save id="ef_cq"><option>N/A</option><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option></select></td></tr>
       <tr><td>Supervisor</td><td><select  data-save id="ef_supervisor"><option>N/A</option><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option></select></td></tr>
-      <tr><th>TOTAL</th><th><select  data-save id="ef_total"><option>N/A</option><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option></select></th></tr></table>
+      <tr><th class="total-left">Total</th><th><input type="text" id="ef_total" data-save readonly value="0" style="text-align:left;font-weight:bold;background:#f3f3f3;cursor:not-allowed;"></th></tr></table>
     </div></div>
     <div class="section"><h2>5. EQUIPAMENTOS UTILIZADOS</h2><div class="content">
-      <table><tr><th>EQUIPAMENTO</th><th>QUANTIDADE</th></tr>
+      <table><tr><th>EQUIPAMENTO</th><th class="quantidade-left">Quantidade</th></tr>
       <tr><td>Máquina de Solda (TIG/MIG)</td><td><select  data-save id="eq_solda"><option>N/A</option><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option></select></td></tr>
       <tr><td>Esmerilhadeira</td><td><select  data-save id="eq_esmerilhadeira"><option>N/A</option><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option></select></td></tr>
       <tr><td>Talha</td><td><select  data-save id="eq_talha"><option>N/A</option><option></option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option><option>32</option><option>33</option><option>34</option><option>35</option><option>36</option><option>37</option><option>38</option><option>39</option><option>40</option><option>41</option><option>42</option><option>43</option><option>44</option><option>45</option><option>46</option><option>47</option><option>48</option><option>49</option><option>50</option></select></td></tr>
@@ -516,14 +544,14 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
   <div class="footer-sign">
     <div class="sign">
       <div>RESPONSÁVEL (PRESTADORA)</div>
-      <select data-save id="assin_prestadora" style="margin-top:14px;text-align:center;font-weight:900;color:#082b5f;">
+      <select data-save id="assin_prestadora" style="margin-top:14px;text-align:left;font-weight:900;color:#082b5f;">
         <option selected>RAFAEL COSTA</option>
         <option>CASSIO</option>
       </select>
     </div>
     <div class="sign">
       <div>FISCAL (CLIENTE)</div>
-      <select data-save id="fiscal_cliente" style="margin-top:14px;text-align:center;font-weight:900;color:#082b5f;">
+      <select data-save id="fiscal_cliente" style="margin-top:14px;text-align:left;font-weight:900;color:#082b5f;">
         <option selected>ROBSON CALIXTO</option>
       </select>
     </div>
@@ -769,6 +797,27 @@ function carregarRascunho(){
 campos().forEach(el => el.addEventListener("input", autoSalvarRascunho));
 carregarRascunho();
 
+
+
+function atualizarEfetivoTotal(){
+ const ids=["ef_soldadores","ef_encanadores","ef_cq","ef_supervisor"];
+ let total=0;
+ ids.forEach(id=>{
+   const el=document.getElementById(id);
+   if(!el) return;
+   const v=parseInt(el.value,10);
+   if(!isNaN(v)) total+=v;
+ });
+ const t=document.getElementById("ef_total");
+ if(t) t.value=total;
+}
+window.addEventListener('DOMContentLoaded',()=>{
+ ["ef_soldadores","ef_encanadores","ef_cq","ef_supervisor"].forEach(id=>{
+   const el=document.getElementById(id);
+   if(el) el.addEventListener('change',atualizarEfetivoTotal);
+ });
+ atualizarEfetivoTotal();
+});
 
 function gerarPDF(){
   salvarRDO();
