@@ -61,6 +61,18 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
 .photo input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .footer-sign{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px}
 .sign{border:1px solid var(--borda);border-radius:8px;padding:20px;text-align:center;font-weight:900;color:var(--azul)}
+
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:999;align-items:center;justify-content:center;padding:16px}
+.modal-box{background:#fff;width:min(1000px,96vw);max-height:88vh;overflow:auto;border-radius:14px;padding:16px;box-shadow:0 8px 30px #0006}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+.modal-head h2{margin:0;color:var(--azul)}
+#buscaHistorico{margin:8px 0 12px}
+.hist-card{border:1px solid var(--borda);border-radius:10px;padding:10px;margin:8px 0;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.hist-title{font-weight:900;color:var(--azul);font-size:16px}
+.hist-info{font-size:13px;color:#333;margin-top:4px}
+.hist-actions{display:flex;gap:6px;flex-wrap:wrap}
+.hist-actions button{padding:7px 10px}
+
 @media(max-width:800px){
   .header{grid-template-columns:1fr}
   .brand,.title,.rdo-num{justify-content:center;text-align:center}
@@ -297,11 +309,27 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
 </head>
 <body>
 <div class="topbar">
-  <div><b>Sistema RDO Palmont</b><br><small>Preencha, salve no navegador e gere PDF</small></div>
+  <div><b>Sistema RDO Palmont</b><br><small>Com histórico, edição, backup e PDF</small></div>
   <div class="actions">
-    <button class="primary" onclick="salvar()">Salvar</button>
-    <button class="success" onclick="salvar(); window.print()">Gerar PDF</button>
-    <button class="danger" onclick="limpar()">Limpar</button>
+    <button class="primary" onclick="novoRDO()">Novo RDO</button>
+    <button class="primary" onclick="abrirHistorico()">Histórico</button>
+    <button class="primary" onclick="salvarRDO()">Salvar no Histórico</button>
+    <button class="success" onclick="salvarRDO(); window.print()">Gerar PDF</button>
+    <button class="primary" onclick="exportarBackup()">Backup</button>
+    <button class="primary" onclick="document.getElementById('importBackup').click()">Restaurar</button>
+    <input id="importBackup" type="file" accept=".json" style="display:none" onchange="importarBackup(this)">
+    <button class="danger" onclick="limparFormulario()">Limpar Tela</button>
+  </div>
+</div>
+
+<div id="modalHistorico" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2>Histórico de RDO</h2>
+      <button onclick="fecharHistorico()">Fechar</button>
+    </div>
+    <input id="buscaHistorico" placeholder="Pesquisar por nº, data, cliente, contrato, prestadora ou responsável..." oninput="renderHistorico()">
+    <div id="listaHistorico"></div>
   </div>
 </div>
 
@@ -406,45 +434,243 @@ th{background:#f0f3f7;color:var(--azul);font-weight:900}
 </div>
 
 <script>
-const KEY="rdo_palmont_v1_vazio";
-function salvar(){
-  const data={};
-  document.querySelectorAll("[data-save]").forEach(el=>data[el.id]=el.value);
-  data.fotos=[...document.querySelectorAll(".photo img")].map(img=>img?img.src:null);
-  localStorage.setItem(KEY, JSON.stringify(data));
-  alert("RDO salvo no navegador!");
+const KEY_OLD = "rdo_palmont_v1_vazio";
+const DB_KEY = "rdo_palmont_historico_v1";
+let currentId = null;
+
+function campos(){
+  return [...document.querySelectorAll("[data-save]")];
 }
-function carregar(){
-  const data=JSON.parse(localStorage.getItem(KEY)||"{}");
-  Object.entries(data).forEach(([id,val])=>{
-    const el=document.getElementById(id);
-    if(el && id!=="fotos") el.value=val;
+
+function coletarDados(){
+  const data = {};
+  campos().forEach(el => data[el.id] = el.value);
+  data.fotos = [...document.querySelectorAll(".photo img")].map(img => img ? img.src : null);
+  return data;
+}
+
+function aplicarDados(data){
+  campos().forEach(el => el.value = data?.[el.id] || "");
+  document.querySelectorAll(".photo").forEach((div,i)=>{
+    const img = div.querySelector("img");
+    if(img) img.remove();
+    if(data?.fotos?.[i]) setFoto(i, data.fotos[i]);
   });
-  if(data.fotos){
-    data.fotos.forEach((src,i)=>{ if(src) setFoto(i,src); });
+}
+
+function getHistorico(){
+  return JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+}
+
+function setHistorico(lista){
+  localStorage.setItem(DB_KEY, JSON.stringify(lista));
+}
+
+function salvarRDO(){
+  const dados = coletarDados();
+  const numero = (dados.numero || "").trim();
+  const data = dados.data || "";
+  const cliente = dados.cliente || "";
+  const contrato = dados.contrato || "";
+  const prestadora = dados.prestadora || "";
+  const responsavel = dados.responsavel || "";
+
+  if(!numero && !data && !cliente && !contrato){
+    alert("Preencha pelo menos Nº, Data, Cliente ou Contrato antes de salvar.");
+    return;
+  }
+
+  const lista = getHistorico();
+  const agora = new Date().toISOString();
+
+  if(!currentId){
+    currentId = "rdo_" + Date.now();
+  }
+
+  const registro = {
+    id: currentId,
+    numero,
+    data,
+    cliente,
+    contrato,
+    prestadora,
+    responsavel,
+    atualizadoEm: agora,
+    dados
+  };
+
+  const idx = lista.findIndex(x => x.id === currentId);
+  if(idx >= 0) lista[idx] = registro;
+  else lista.unshift(registro);
+
+  setHistorico(lista);
+  localStorage.setItem(KEY_OLD, JSON.stringify(dados));
+  alert("RDO salvo no histórico!");
+}
+
+function novoRDO(){
+  if(confirm("Criar novo RDO? O formulário atual será limpo.")){
+    currentId = null;
+    aplicarDados({});
+    localStorage.removeItem(KEY_OLD);
   }
 }
-function limpar(){
-  if(confirm("Deseja limpar todo o RDO salvo?")){
-    localStorage.removeItem(KEY);
-    location.reload();
+
+function limparFormulario(){
+  if(confirm("Limpar apenas a tela atual? O histórico salvo não será apagado.")){
+    currentId = null;
+    aplicarDados({});
+    localStorage.removeItem(KEY_OLD);
   }
 }
-function setFoto(i,src){
-  const div=document.querySelectorAll(".photo")[i];
-  let img=div.querySelector("img");
-  if(!img){ img=document.createElement("img"); div.appendChild(img); }
-  img.src=src;
+
+function abrirHistorico(){
+  document.getElementById("modalHistorico").style.display = "flex";
+  renderHistorico();
 }
-function foto(input,i){
-  const file=input.files[0];
+
+function fecharHistorico(){
+  document.getElementById("modalHistorico").style.display = "none";
+}
+
+function renderHistorico(){
+  const busca = (document.getElementById("buscaHistorico").value || "").toLowerCase();
+  const lista = getHistorico().filter(r => {
+    const texto = `${r.numero} ${r.data} ${r.cliente} ${r.contrato} ${r.prestadora} ${r.responsavel}`.toLowerCase();
+    return texto.includes(busca);
+  });
+
+  const box = document.getElementById("listaHistorico");
+  if(lista.length === 0){
+    box.innerHTML = "<p>Nenhum RDO encontrado.</p>";
+    return;
+  }
+
+  box.innerHTML = lista.map(r => `
+    <div class="hist-card">
+      <div>
+        <div class="hist-title">RDO ${r.numero || "sem nº"} - ${formatarData(r.data)}</div>
+        <div class="hist-info">
+          Contrato: ${r.contrato || "-"} | Cliente: ${r.cliente || "-"} | Prestadora: ${r.prestadora || "-"} | Responsável: ${r.responsavel || "-"}<br>
+          Atualizado: ${new Date(r.atualizadoEm).toLocaleString("pt-BR")}
+        </div>
+      </div>
+      <div class="hist-actions">
+        <button class="primary" onclick="editarRDO('${r.id}')">Editar</button>
+        <button class="success" onclick="pdfRDO('${r.id}')">PDF</button>
+        <button class="primary" onclick="duplicarRDO('${r.id}')">Duplicar</button>
+        <button class="danger" onclick="excluirRDO('${r.id}')">Excluir</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function editarRDO(id){
+  const r = getHistorico().find(x => x.id === id);
+  if(!r) return;
+  currentId = id;
+  aplicarDados(r.dados);
+  localStorage.setItem(KEY_OLD, JSON.stringify(r.dados));
+  fecharHistorico();
+}
+
+function pdfRDO(id){
+  editarRDO(id);
+  setTimeout(() => window.print(), 250);
+}
+
+function duplicarRDO(id){
+  const r = getHistorico().find(x => x.id === id);
+  if(!r) return;
+  currentId = null;
+  const dados = JSON.parse(JSON.stringify(r.dados));
+  dados.numero = "";
+  aplicarDados(dados);
+  fecharHistorico();
+  alert("RDO duplicado na tela. Informe novo número/data e clique em Salvar no Histórico.");
+}
+
+function excluirRDO(id){
+  if(!confirm("Excluir este RDO do histórico?")) return;
+  const lista = getHistorico().filter(x => x.id !== id);
+  setHistorico(lista);
+  if(currentId === id) currentId = null;
+  renderHistorico();
+}
+
+function exportarBackup(){
+  const dados = {
+    versao: 1,
+    criadoEm: new Date().toISOString(),
+    historico: getHistorico()
+  };
+  const blob = new Blob([JSON.stringify(dados, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "backup_rdo_palmont.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importarBackup(input){
+  const file = input.files[0];
   if(!file) return;
-  const reader=new FileReader();
-  reader.onload=e=>{ setFoto(i,e.target.result); salvar(); };
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const dados = JSON.parse(e.target.result);
+      const historico = Array.isArray(dados) ? dados : dados.historico;
+      if(!Array.isArray(historico)) throw new Error("Backup inválido");
+      if(confirm("Restaurar backup? Isso substituirá o histórico atual.")){
+        setHistorico(historico);
+        alert("Backup restaurado!");
+        renderHistorico();
+      }
+    }catch(err){
+      alert("Arquivo de backup inválido.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function setFoto(i,src){
+  const div = document.querySelectorAll(".photo")[i];
+  let img = div.querySelector("img");
+  if(!img){
+    img = document.createElement("img");
+    div.appendChild(img);
+  }
+  img.src = src;
+}
+
+function foto(input,i){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    setFoto(i, e.target.result);
+    autoSalvarRascunho();
+  };
   reader.readAsDataURL(file);
 }
-document.querySelectorAll("[data-save]").forEach(el=>el.addEventListener("input",()=>localStorage.setItem(KEY, JSON.stringify(Object.fromEntries([...document.querySelectorAll('[data-save]')].map(e=>[e.id,e.value]))))));
-carregar();
+
+function autoSalvarRascunho(){
+  localStorage.setItem(KEY_OLD, JSON.stringify(coletarDados()));
+}
+
+function formatarData(data){
+  if(!data) return "";
+  const [a,m,d] = data.split("-");
+  return `${d}/${m}/${a}`;
+}
+
+function carregarRascunho(){
+  const data = JSON.parse(localStorage.getItem(KEY_OLD) || "{}");
+  aplicarDados(data);
+}
+
+campos().forEach(el => el.addEventListener("input", autoSalvarRascunho));
+carregarRascunho();
 </script>
 </body>
 </html>
