@@ -597,9 +597,111 @@ td input[readonly]{
 </div>
 
 <script>
-const KEY_OLD = "rdo_palmont_v1_vazio";
-const DB_KEY = "rdo_palmont_historico_v1";
+const KEY_OLD = "rdo_palmont_v1_vazio";        // chave do rascunho no IndexedDB
+const IDB_NAME = "rdo_palmont_db";
+const IDB_VERSION = 1;
+const STORE_HIST = "historico";
+const STORE_RASCUNHO = "rascunho";
 let currentId = null;
+
+/* ---------- Camada de armazenamento (IndexedDB) ----------
+   Trocamos o localStorage por IndexedDB porque ele aguenta
+   MUITO mais dados (fotos em base64 incluídas) sem travar a
+   página nem estourar limite de espaço, e as operações não
+   bloqueiam a interface (são assíncronas). */
+
+let _dbPromise = null;
+function abrirDB(){
+  if(_dbPromise) return _dbPromise;
+  _dbPromise = new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if(!db.objectStoreNames.contains(STORE_HIST)){
+        db.createObjectStore(STORE_HIST, { keyPath: "id" });
+      }
+      if(!db.objectStoreNames.contains(STORE_RASCUNHO)){
+        db.createObjectStore(STORE_RASCUNHO);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return _dbPromise;
+}
+
+async function idbPut(storeName, value, key){
+  const db = await abrirDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    key === undefined ? tx.objectStore(storeName).put(value) : tx.objectStore(storeName).put(value, key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function idbGet(storeName, key){
+  const db = await abrirDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readonly");
+    const req = tx.objectStore(storeName).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbGetAll(storeName){
+  const db = await abrirDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readonly");
+    const req = tx.objectStore(storeName).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbDelete(storeName, key){
+  const db = await abrirDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    tx.objectStore(storeName).delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function idbClear(storeName){
+  const db = await abrirDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    tx.objectStore(storeName).clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+/* Migra dados antigos do localStorage (se existirem) para o IndexedDB,
+   assim quem já tinha RDOs salvos não perde nada na troca. */
+async function migrarDoLocalStorageSeNecessario(){
+  try{
+    const LEGACY_DB_KEY = "rdo_palmont_historico_v1";
+    const legadoHist = localStorage.getItem(LEGACY_DB_KEY);
+    if(legadoHist){
+      const lista = JSON.parse(legadoHist);
+      if(Array.isArray(lista)){
+        for(const r of lista) await idbPut(STORE_HIST, r);
+      }
+      localStorage.removeItem(LEGACY_DB_KEY);
+    }
+    const legadoRascunho = localStorage.getItem(KEY_OLD);
+    if(legadoRascunho){
+      await idbPut(STORE_RASCUNHO, JSON.parse(legadoRascunho), "atual");
+      localStorage.removeItem(KEY_OLD);
+    }
+  }catch(err){
+    console.error("Falha ao migrar dados antigos do localStorage:", err);
+  }
+}
 
 function campos(){
   return [...document.querySelectorAll("[data-save]")];
@@ -621,15 +723,13 @@ function aplicarDados(data){
   });
 }
 
-function getHistorico(){
-  return JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+async function getHistorico(){
+  const lista = await idbGetAll(STORE_HIST);
+  lista.sort((a,b) => (b.atualizadoEm || "").localeCompare(a.atualizadoEm || ""));
+  return lista;
 }
 
-function setHistorico(lista){
-  localStorage.setItem(DB_KEY, JSON.stringify(lista));
-}
-
-function salvarRDO(){
+async function salvarRDO(){
   const dados = coletarDados();
   const numero = (dados.numero || "").trim();
   const data = dados.data || "";
@@ -643,7 +743,6 @@ function salvarRDO(){
     return;
   }
 
-  const lista = getHistorico();
   const agora = new Date().toISOString();
 
   if(!currentId){
@@ -662,20 +761,21 @@ function salvarRDO(){
     dados
   };
 
-  const idx = lista.findIndex(x => x.id === currentId);
-  if(idx >= 0) lista[idx] = registro;
-  else lista.unshift(registro);
-
-  setHistorico(lista);
-  localStorage.setItem(KEY_OLD, JSON.stringify(dados));
-  alert("RDO salvo no histórico!");
+  try{
+    await idbPut(STORE_HIST, registro);
+    await idbPut(STORE_RASCUNHO, dados, "atual");
+    alert("RDO salvo no histórico!");
+  }catch(err){
+    console.error("Erro ao salvar:", err);
+    alert("Não foi possível salvar. Verifique o espaço de armazenamento do navegador e tente novamente.");
+  }
 }
 
 function novoRDO(){
   if(confirm("Criar novo RDO? O formulário atual será limpo.")){
     currentId = null;
     aplicarDados({});
-    localStorage.removeItem(KEY_OLD);
+    idbDelete(STORE_RASCUNHO, "atual");
   }
 }
 
@@ -683,7 +783,7 @@ function limparFormulario(){
   if(confirm("Limpar apenas a tela atual? O histórico salvo não será apagado.")){
     currentId = null;
     aplicarDados({});
-    localStorage.removeItem(KEY_OLD);
+    idbDelete(STORE_RASCUNHO, "atual");
   }
 }
 
@@ -696,9 +796,10 @@ function fecharHistorico(){
   document.getElementById("modalHistorico").style.display = "none";
 }
 
-function renderHistorico(){
+async function renderHistorico(){
   const busca = (document.getElementById("buscaHistorico").value || "").toLowerCase();
-  const lista = getHistorico().filter(r => {
+  const todos = await getHistorico();
+  const lista = todos.filter(r => {
     const texto = `${r.numero} ${r.data} ${r.cliente} ${r.contrato} ${r.prestadora} ${r.responsavel}`.toLowerCase();
     return texto.includes(busca);
   });
@@ -728,22 +829,22 @@ function renderHistorico(){
   `).join("");
 }
 
-function editarRDO(id){
-  const r = getHistorico().find(x => x.id === id);
+async function editarRDO(id){
+  const r = await idbGet(STORE_HIST, id);
   if(!r) return;
   currentId = id;
   aplicarDados(r.dados);
-  localStorage.setItem(KEY_OLD, JSON.stringify(r.dados));
+  await idbPut(STORE_RASCUNHO, r.dados, "atual");
   fecharHistorico();
 }
 
-function pdfRDO(id){
-  editarRDO(id);
+async function pdfRDO(id){
+  await editarRDO(id);
   setTimeout(() => window.print(), 250);
 }
 
-function duplicarRDO(id){
-  const r = getHistorico().find(x => x.id === id);
+async function duplicarRDO(id){
+  const r = await idbGet(STORE_HIST, id);
   if(!r) return;
   currentId = null;
   const dados = JSON.parse(JSON.stringify(r.dados));
@@ -753,19 +854,18 @@ function duplicarRDO(id){
   alert("RDO duplicado na tela. Informe novo número/data e clique em Salvar no Histórico.");
 }
 
-function excluirRDO(id){
+async function excluirRDO(id){
   if(!confirm("Excluir este RDO do histórico?")) return;
-  const lista = getHistorico().filter(x => x.id !== id);
-  setHistorico(lista);
+  await idbDelete(STORE_HIST, id);
   if(currentId === id) currentId = null;
   renderHistorico();
 }
 
-function exportarBackup(){
+async function exportarBackup(){
   const dados = {
     versao: 1,
     criadoEm: new Date().toISOString(),
-    historico: getHistorico()
+    historico: await getHistorico()
   };
   const blob = new Blob([JSON.stringify(dados, null, 2)], {type:"application/json"});
   const a = document.createElement("a");
@@ -779,17 +879,19 @@ function importarBackup(input){
   const file = input.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = async e => {
     try{
       const dados = JSON.parse(e.target.result);
       const historico = Array.isArray(dados) ? dados : dados.historico;
       if(!Array.isArray(historico)) throw new Error("Backup inválido");
       if(confirm("Restaurar backup? Isso substituirá o histórico atual.")){
-        setHistorico(historico);
+        await idbClear(STORE_HIST);
+        for(const r of historico) await idbPut(STORE_HIST, r);
         alert("Backup restaurado!");
         renderHistorico();
       }
     }catch(err){
+      console.error(err);
       alert("Arquivo de backup inválido.");
     }
   };
@@ -811,14 +913,39 @@ function foto(input,i){
   if(!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    setFoto(i, e.target.result);
-    autoSalvarRascunho();
+    const img = new Image();
+    img.onload = () => {
+      // Redimensiona/comprime a imagem antes de salvar, para não travar
+      // o navegador nem estourar o limite do localStorage.
+      const MAX_LADO = 1000;
+      let w = img.width, h = img.height;
+      if(w > MAX_LADO || h > MAX_LADO){
+        if(w > h){ h = Math.round(h * MAX_LADO / w); w = MAX_LADO; }
+        else { w = Math.round(w * MAX_LADO / h); h = MAX_LADO; }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+      setFoto(i, dataUrl);
+      autoSalvarRascunho();
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
+let _autoSalvarTimer = null;
 function autoSalvarRascunho(){
-  localStorage.setItem(KEY_OLD, JSON.stringify(coletarDados()));
+  clearTimeout(_autoSalvarTimer);
+  _autoSalvarTimer = setTimeout(async () => {
+    try{
+      await idbPut(STORE_RASCUNHO, coletarDados(), "atual");
+    }catch(err){
+      console.error("Falha ao salvar rascunho automaticamente:", err);
+    }
+  }, 500);
 }
 
 function formatarData(data){
@@ -827,9 +954,10 @@ function formatarData(data){
   return `${d}/${m}/${a}`;
 }
 
-function carregarRascunho(){
-  const data = JSON.parse(localStorage.getItem(KEY_OLD) || "{}");
-  aplicarDados(data);
+async function carregarRascunho(){
+  await migrarDoLocalStorageSeNecessario();
+  const data = await idbGet(STORE_RASCUNHO, "atual");
+  aplicarDados(data || {});
 }
 
 campos().forEach(el => el.addEventListener("input", autoSalvarRascunho));
@@ -857,8 +985,8 @@ window.addEventListener('DOMContentLoaded',()=>{
  atualizarEfetivoTotal();
 });
 
-function gerarPDF(){
-  salvarRDO();
+async function gerarPDF(){
+  await salvarRDO();
 
   const numeroCampo = document.getElementById("numero");
   const prestadoraCampo = document.getElementById("prestadora");
